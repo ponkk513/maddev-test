@@ -2,3 +2,4 @@ dist
 node_modules
 public/mockServiceWorker.js
 package-lock.json
+AI_CHAT.md
