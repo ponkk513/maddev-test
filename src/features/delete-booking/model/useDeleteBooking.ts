@@ -1,0 +1,47 @@
+import { useState } from 'react';
+import { formatBooking, hasErrorCode, useDeleteBooking, type Booking } from '@/entities/booking';
+import { getErrorMessage } from '@/shared/api';
+
+type Options = {
+  /** Called once the booking is gone (deleted now or already deleted by someone else). */
+  onDeleted: (booking: Booking, message: string) => void;
+};
+
+/** Delete-with-confirmation flow: which booking is being confirmed, request state, errors. */
+export function useDeleteBookingFlow({ onDeleted }: Options) {
+  const [target, setTarget] = useState<Booking | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const mutation = useDeleteBooking();
+
+  function finish(booking: Booking, message: string) {
+    setTarget(null);
+    onDeleted(booking, message);
+  }
+
+  async function confirm() {
+    if (!target) return;
+    setError(null);
+    try {
+      await mutation.mutateAsync(target);
+      finish(target, `Бронь ${formatBooking({ ...target, title: undefined })} удалена`);
+    } catch (e) {
+      // The goal is achieved anyway — the list has already been refetched.
+      if (hasErrorCode(e, 'NOT_FOUND')) finish(target, 'Эта бронь уже была удалена');
+      else setError(getErrorMessage(e));
+    }
+  }
+
+  return {
+    target,
+    error,
+    isDeleting: mutation.isPending,
+    request: (booking: Booking) => {
+      setError(null);
+      setTarget(booking);
+    },
+    close: () => setTarget(null),
+    confirm,
+  };
+}
+
+export type DeleteBookingFlow = ReturnType<typeof useDeleteBookingFlow>;
