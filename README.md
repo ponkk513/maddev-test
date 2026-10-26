@@ -4,8 +4,8 @@
 
 **Стек:** React 18 + TypeScript (strict) + Vite, TanStack Query (серверное состояние), React Hook Form + zod (формы и контракт API), MSW (mock API), Vitest + Testing Library, ESLint + Prettier. Структура — [Feature-Sliced Design](https://feature-sliced.design/). Стили — обычный CSS без UI-библиотек.
 
-- Демо: _<ссылка на деплой>_
-- Репозиторий: _<ссылка>_
+- Демо: https://maddev-test.vercel.app/
+- Репозиторий: https://github.com/ponkk513/maddev-test
 
 ## Запуск
 
