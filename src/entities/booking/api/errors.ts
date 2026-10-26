@@ -19,18 +19,23 @@ const validationBodySchema = z.object({
   issues: z.array(z.object({ field: z.string(), code: z.string(), message: z.string() })),
 });
 
-export function hasErrorCode(error: unknown, code: BookingErrorCode): error is ApiError {
-  return isApiError(error) && error.code === code;
+// Detected by HTTP status: the contract guarantees the status, the body is optional details.
+export function isConflictError(error: unknown): error is ApiError {
+  return isApiError(error) && error.status === 409;
+}
+
+export function isNotFoundError(error: unknown): error is ApiError {
+  return isApiError(error) && error.status === 404;
 }
 
 export function getConflicts(error: unknown): Booking[] {
-  if (!hasErrorCode(error, 'CONFLICT')) return [];
+  if (!isConflictError(error)) return [];
   const parsed = conflictBodySchema.safeParse(error.body);
   return parsed.success ? parsed.data.conflicts : [];
 }
 
 export function getValidationIssues(error: unknown): ValidationIssue[] {
-  if (!hasErrorCode(error, 'VALIDATION')) return [];
+  if (!isApiError(error) || error.status !== 422) return [];
   const parsed = validationBodySchema.safeParse(error.body);
   return parsed.success ? (parsed.data.issues as ValidationIssue[]) : [];
 }

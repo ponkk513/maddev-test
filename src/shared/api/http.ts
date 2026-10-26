@@ -1,14 +1,17 @@
-import type { ZodType } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
 import { ApiError, apiErrorBodySchema } from './errors';
 
 export type RequestOptions<T> = RequestInit & {
-  schema?: ZodType<T>;
+  schema?: ZodType<T, ZodTypeDef, unknown>;
 };
 
 export type HttpClient = <T>(path: string, options?: RequestOptions<T>) => Promise<T>;
 
 export function createHttpClient(baseUrl: string): HttpClient {
-  const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
+  const base = new URL(
+    baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`,
+    globalThis.location?.href ?? 'http://localhost/',
+  );
 
   return async function request<T>(path: string, options: RequestOptions<T> = {}): Promise<T> {
     const { schema, ...init } = options;
@@ -29,8 +32,7 @@ export function createHttpClient(baseUrl: string): HttpClient {
       throw new ApiError(0, 'NETWORK', 'Network error');
     }
 
-    const data: unknown =
-      response.status === 204 ? undefined : await response.json().catch(() => null);
+    const data = await readJson(response);
 
     if (!response.ok) {
       const body = apiErrorBodySchema.safeParse(data);
@@ -40,7 +42,7 @@ export function createHttpClient(baseUrl: string): HttpClient {
       throw new ApiError(
         response.status,
         'UNKNOWN',
-        `Request failed with status ${response.status}`,
+        `Не удалось выполнить запрос (HTTP ${response.status}).`,
       );
     }
 
@@ -51,4 +53,14 @@ export function createHttpClient(baseUrl: string): HttpClient {
     }
     return parsed.data;
   };
+}
+
+async function readJson(response: Response): Promise<unknown> {
+  const text = await response.text();
+  if (!text) return undefined;
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
 }

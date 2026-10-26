@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { formatBooking, hasErrorCode, useDeleteBooking, type Booking } from '@/entities/booking';
+import { formatBooking, isNotFoundError, useDeleteBooking, type Booking } from '@/entities/booking';
 import { getErrorMessage } from '@/shared/api';
 
 type Options = {
@@ -23,7 +23,7 @@ export function useDeleteBookingFlow({ onDeleted }: Options) {
       await mutation.mutateAsync(target);
       finish(target, `Бронь ${formatBooking({ ...target, title: undefined })} удалена`);
     } catch (e) {
-      if (hasErrorCode(e, 'NOT_FOUND')) finish(target, 'Эта бронь уже была удалена');
+      if (isNotFoundError(e)) finish(target, 'Эта бронь уже была удалена');
       else setError(getErrorMessage(e));
     }
   }

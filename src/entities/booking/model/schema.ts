@@ -6,11 +6,18 @@ export const bookingSchema = z.object({
   date: z.string(),
   start: z.string(),
   end: z.string(),
-  title: z.string().optional(),
-}) satisfies z.ZodType<Booking>;
+  title: z
+    .string()
+    .nullish()
+    .transform((title) => title ?? undefined),
+}) satisfies z.ZodType<Booking, z.ZodTypeDef, unknown>;
 
 export const bookingDraftSchema = bookingSchema.omit({
   id: true,
-}) satisfies z.ZodType<BookingDraft>;
+}) satisfies z.ZodType<BookingDraft, z.ZodTypeDef, unknown>;
 
-export const bookingPatchSchema = bookingDraftSchema.partial() satisfies z.ZodType<BookingPatch>;
+export const bookingPatchSchema = bookingDraftSchema.partial() satisfies z.ZodType<
+  BookingPatch,
+  z.ZodTypeDef,
+  unknown
+>;

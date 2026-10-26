@@ -1,5 +1,5 @@
 import { delay, http, HttpResponse } from 'msw';
-import type { ZodType } from 'zod';
+import type { ZodType, ZodTypeDef } from 'zod';
 import {
   bookingDraftSchema,
   bookingPatchSchema,
@@ -32,7 +32,7 @@ function normalizeTitle(title: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-async function parseBody<T>(request: Request, schema: ZodType<T>) {
+async function parseBody<T>(request: Request, schema: ZodType<T, ZodTypeDef, unknown>) {
   const json: unknown = await request.json().catch(() => undefined);
   return schema.safeParse(json);
 }

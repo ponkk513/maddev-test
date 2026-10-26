@@ -17,7 +17,20 @@ npm run check   # типы + ESLint + Prettier + тесты
 npm run build   # production-сборка
 ```
 
-Mock API (MSW) работает и в production-сборке, бэкенд не нужен. Подключить реальный API с тем же контрактом: `VITE_USE_MOCKS=false VITE_API_URL=https://api.example.com npm run build`.
+Mock API (MSW) работает и в production-сборке, бэкенд не нужен.
+
+## Подключение реального API
+
+Скопируйте `.env.example` в `.env.local` (или задайте переменные в Vercel → Settings → Environment Variables и сделайте Redeploy):
+
+```bash
+VITE_USE_MOCKS=false                  # MSW и панель демо не попадут в сборку
+VITE_API_URL=https://api.example.com  # без /api, пути /api/bookings… добавляет клиент
+```
+
+Требования к серверу — контракт из ТЗ: четыре эндпоинта и тип `Booking`. Конфликт и «не найдено» определяются по статусам 409 и 404. Тело ошибки `{ code, message, conflicts? }` необязательно: если оно есть, в сообщении будет указана мешающая бронь. Если API на другом домене, он должен разрешать CORS; можно указать и относительный путь за прокси (`VITE_API_URL=/backend`).
+
+Другой транспорт (GraphQL и т. п.) — реализация интерфейса `BookingsApi` в [`bookingsApi.ts`](src/entities/booking/api/bookingsApi.ts).
 
 ## Что сделано
 

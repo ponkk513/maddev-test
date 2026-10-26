@@ -20,7 +20,7 @@ export { formatBooking, formatBookings } from './lib/format';
 
 export { createHttpBookingsApi } from './api/bookingsApi';
 export { useBookings, useCreateBooking, useDeleteBooking, useUpdateBooking } from './api/queries';
-export { getConflicts, getValidationIssues, hasErrorCode } from './api/errors';
+export { getConflicts, getValidationIssues, isConflictError, isNotFoundError } from './api/errors';
 export type { BookingErrorBody } from './api/errors';
 
 export { BookingList } from './ui/BookingList';

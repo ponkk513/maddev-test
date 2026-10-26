@@ -1,4 +1,4 @@
-import { formatBookings, getConflicts, hasErrorCode } from '@/entities/booking';
+import { formatBookings, getConflicts, isConflictError, isNotFoundError } from '@/entities/booking';
 import { getErrorMessage } from '@/shared/api';
 
 export type ServerErrorKind = 'conflict' | 'gone' | 'other';
@@ -6,7 +6,7 @@ export type ServerErrorKind = 'conflict' | 'gone' | 'other';
 export type ServerError = { kind: ServerErrorKind; message: string };
 
 export function toServerError(error: unknown, isEdit: boolean): ServerError {
-  if (hasErrorCode(error, 'CONFLICT')) {
+  if (isConflictError(error)) {
     const conflicts = getConflicts(error);
     const details = conflicts.length ? `: ${formatBookings(conflicts)}` : '';
     return {
@@ -14,7 +14,7 @@ export function toServerError(error: unknown, isEdit: boolean): ServerError {
       message: `Пока вы заполняли форму, это время заняли${details}. Расписание обновлено — выберите другое время, введённые данные сохранены.`,
     };
   }
-  if (hasErrorCode(error, 'NOT_FOUND') && isEdit) {
+  if (isNotFoundError(error) && isEdit) {
     return {
       kind: 'gone',
       message:
