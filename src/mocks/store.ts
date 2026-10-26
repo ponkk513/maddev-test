@@ -3,11 +3,7 @@ import { addDays, toISODate } from '@/shared/lib';
 
 const STORAGE_KEY = 'mock-db:bookings:v1';
 
-/**
- * In-memory "database" persisted to localStorage.
- * Data is re-read on every operation, so two open tabs behave like
- * two users of one server — a natural way to reproduce a 409.
- */
+// Re-reads localStorage on every call, so two tabs act as two users of one server.
 export class BookingStore {
   private memory: Booking[] | null = null;
 
@@ -66,7 +62,7 @@ export class BookingStore {
     try {
       this.storage?.setItem(STORAGE_KEY, JSON.stringify(bookings));
     } catch {
-      // Storage is unavailable (private mode, quota) — keep working in memory.
+      // Storage unavailable (private mode, quota): keep working in memory.
     }
   }
 }
@@ -85,7 +81,6 @@ export function createId(): string {
     : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-/** Demo data relative to "today", so the demo always looks alive. */
 function createSeed(now: Date): Booking[] {
   const today = toISODate(now);
   const tomorrow = addDays(today, 1);

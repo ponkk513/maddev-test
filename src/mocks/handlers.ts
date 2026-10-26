@@ -7,6 +7,7 @@ import {
   formatBookings,
   isBookingLocked,
   MIN_DURATION_MIN,
+  sortByStart,
   validateDraft,
   type Booking,
   type BookingDraft,
@@ -31,7 +32,6 @@ function normalizeTitle(title: string | undefined): string | undefined {
   return trimmed ? trimmed : undefined;
 }
 
-/** Parses an untrusted JSON body by the contract schema; unknown fields (including id) are dropped. */
 async function parseBody<T>(request: Request, schema: ZodType<T>) {
   const json: unknown = await request.json().catch(() => undefined);
   return schema.safeParse(json);
@@ -40,7 +40,6 @@ async function parseBody<T>(request: Request, schema: ZodType<T>) {
 const badRequest = () => error(400, { code: 'BAD_REQUEST', message: 'Некорректное тело запроса' });
 
 export function createHandlers({ store, now = () => new Date() }: HandlerOptions) {
-  /** Common prelude: latency and a simulated outage. */
   async function prelude() {
     const { latencyMs, serverDown } = mockSettings.get();
     if (latencyMs > 0) await delay(latencyMs);
@@ -48,9 +47,8 @@ export function createHandlers({ store, now = () => new Date() }: HandlerOptions
     return null;
   }
 
-  /** "Another user" books part of the requested interval right before us. */
   function maybeSimulateRace(draft: BookingDraft) {
-    if (!mockSettings.consume('simulateConflictOnNextWrite')) return;
+    if (!mockSettings.takeConflictSimulation()) return;
     store.insert({
       id: createId(),
       date: draft.date,
@@ -60,7 +58,6 @@ export function createHandlers({ store, now = () => new Date() }: HandlerOptions
     });
   }
 
-  /** Business rules: the server never trusts the client. */
   function check(draft: BookingDraft, excludeId?: string) {
     const issues = validateDraft(draft, now());
     if (issues.length > 0) {
@@ -94,8 +91,7 @@ export function createHandlers({ store, now = () => new Date() }: HandlerOptions
           message: 'Параметр date должен быть в формате YYYY-MM-DD',
         });
       }
-      const bookings = store.byDate(date).sort((a, b) => toMinutes(a.start) - toMinutes(b.start));
-      return HttpResponse.json(bookings);
+      return HttpResponse.json(sortByStart(store.byDate(date)));
     }),
 
     http.post('*/api/bookings', async ({ request }) => {

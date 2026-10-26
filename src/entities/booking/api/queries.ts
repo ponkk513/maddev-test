@@ -14,10 +14,7 @@ export function useBookings(date: string) {
   });
 }
 
-/**
- * After any write — successful or not — the list for the date is refetched:
- * on 409/404 the local data is known to be stale.
- */
+// Used in onSettled, not onSuccess: after a 409 or 404 the cached list is stale too.
 function useInvalidateDate() {
   const queryClient = useQueryClient();
   return (date: string) => queryClient.invalidateQueries({ queryKey: bookingKeys.byDate(date) });

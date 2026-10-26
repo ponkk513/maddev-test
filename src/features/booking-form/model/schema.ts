@@ -14,17 +14,11 @@ export type BookingFormContext = {
   date: string;
   now: Date;
   bookings: readonly Booking[];
-  /** The booking being edited — it must not conflict with itself. */
   excludeId?: string;
 };
 
 export const EMPTY_VALUES: BookingFormValues = { start: '', end: '', title: '' };
 
-/**
- * The form schema is a thin adapter: the rules themselves are pure functions of the
- * booking entity (shared with the server); here they are mapped onto form fields.
- * Built per render because the rules depend on "now" and on the day's bookings.
- */
 export function createBookingFormSchema(ctx: BookingFormContext) {
   return z
     .object({ start: z.string(), end: z.string(), title: z.string() })
@@ -32,7 +26,6 @@ export function createBookingFormSchema(ctx: BookingFormContext) {
       const draft = { date: ctx.date, ...values };
       const issues = validateDraft(draft, ctx.now);
       for (const issue of issues) {
-        // A past date is not a field error: the form is not offered for such dates at all.
         if (issue.field === 'date') continue;
         issueCtx.addIssue({
           code: z.ZodIssueCode.custom,
@@ -57,7 +50,7 @@ export function toDraft(values: BookingFormValues, date: string): BookingDraft {
   return { date, start: values.start, end: values.end, title: values.title.trim() || undefined };
 }
 
-/** An empty string explicitly clears the title (undefined would be dropped from JSON). */
+// '' rather than undefined: an undefined title would be dropped from JSON and not cleared.
 export function toPatch(values: BookingFormValues): BookingPatch {
   return { start: values.start, end: values.end, title: values.title.trim() };
 }

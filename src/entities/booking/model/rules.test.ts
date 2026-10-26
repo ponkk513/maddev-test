@@ -1,7 +1,6 @@
 import type { Booking, BookingDraft } from './types';
 import { findConflicts, isBookingLocked, overlaps, validateDraft } from './rules';
 
-// Monday, 4 March 2030, 12:10 local time.
 const NOW = new Date(2030, 2, 4, 12, 10);
 const TODAY = '2030-03-04';
 const TOMORROW = '2030-03-05';

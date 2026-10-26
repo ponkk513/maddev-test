@@ -8,11 +8,6 @@ function readParam(fallback: string): string {
   return isValidDate(value) ? value : fallback;
 }
 
-/**
- * Selected date synced with ?date=YYYY-MM-DD: a link opens the same day; back/forward works.
- * `onChange` fires on every change of the date — by the user or by browser history —
- * so dependants react to an event instead of syncing state in an effect.
- */
 export function useDateParam(fallback: string, onChange?: (date: string) => void) {
   const [date, setDateState] = useState(() => readParam(fallback));
 

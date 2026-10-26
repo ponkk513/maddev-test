@@ -5,7 +5,6 @@ export type ServerErrorKind = 'conflict' | 'gone' | 'other';
 
 export type ServerError = { kind: ServerErrorKind; message: string };
 
-/** Turns a failed save into a message that tells the user what happened and what to do. */
 export function toServerError(error: unknown, isEdit: boolean): ServerError {
   if (hasErrorCode(error, 'CONFLICT')) {
     const conflicts = getConflicts(error);

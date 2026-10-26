@@ -4,10 +4,6 @@ import { API_BASE_URL } from '@/shared/config';
 import { bookingSchema } from '../model/schema';
 import type { Booking, BookingDraft, BookingPatch } from '../model/types';
 
-/**
- * The contract the UI depends on. Any implementation will do:
- * HTTP, GraphQL, local storage, a test fake.
- */
 export interface BookingsApi {
   list(date: string, options?: { signal?: AbortSignal }): Promise<Booking[]>;
   create(draft: BookingDraft): Promise<Booking>;

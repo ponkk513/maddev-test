@@ -1,10 +1,3 @@
-/**
- * Helpers for working with dates (YYYY-MM-DD) and times (HH:mm).
- *
- * All dates are interpreted in the local time zone of the runtime:
- * the room is physical, so "09:00" means 09:00 local time.
- */
-
 const TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
@@ -21,13 +14,11 @@ export function isValidDate(value: unknown): value is string {
   return date.getFullYear() === y && date.getMonth() === m - 1 && date.getDate() === d;
 }
 
-/** "10:30" -> 630 */
 export function toMinutes(time: string): number {
   const [h, m] = time.split(':').map(Number) as [number, number];
   return h * 60 + m;
 }
 
-/** 630 -> "10:30" */
 export function fromMinutes(total: number): string {
   const h = Math.floor(total / 60);
   const m = total % 60;
@@ -56,7 +47,6 @@ export function minutesOfDay(date: Date): number {
   return date.getHours() * 60 + date.getMinutes();
 }
 
-/** Compares ISO dates lexicographically — valid for the YYYY-MM-DD format. */
 export function compareDates(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0;
 }

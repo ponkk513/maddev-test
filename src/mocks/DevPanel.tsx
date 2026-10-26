@@ -3,7 +3,6 @@ import { useQueryClient } from '@tanstack/react-query';
 import { mockSettings } from './devTools';
 import { mockStore } from './browser';
 
-/** Mock server controls — for demoing edge cases. Not part of the product UI. */
 export function DevPanel() {
   const settings = useSyncExternalStore(mockSettings.subscribe, mockSettings.get);
   const queryClient = useQueryClient();

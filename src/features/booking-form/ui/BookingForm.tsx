@@ -19,7 +19,6 @@ export function BookingForm({ model, date, now }: Props) {
   const { errors } = form.formState;
   const isEdit = mode.kind === 'edit';
 
-  // Entering edit mode: bring the form into view (important on mobile) and focus it.
   const { setFocus } = form;
   useEffect(() => {
     if (!model.editingId) return;
@@ -27,10 +26,10 @@ export function BookingForm({ model, date, now }: Props) {
     setFocus('start');
   }, [model.editingId, setFocus]);
 
-  // A server error must not go unnoticed: move focus to the message.
+  const serverMessage = serverError?.message;
   useEffect(() => {
-    if (serverError) alertRef.current?.focus();
-  }, [serverError?.message]); // eslint-disable-line react-hooks/exhaustive-deps -- refocus only when the message changes
+    if (serverMessage) alertRef.current?.focus();
+  }, [serverMessage]);
 
   const title = isEdit ? 'Редактирование брони' : 'Новая бронь';
 
@@ -62,7 +61,6 @@ export function BookingForm({ model, date, now }: Props) {
       )}
 
       <form onSubmit={model.submit} noValidate aria-busy={isSubmitting || !model.ready}>
-        {/* Until the day's bookings are loaded, suggestions and conflict checks are meaningless. */}
         <fieldset className="form__fieldset" disabled={!model.ready}>
           <div className="form__row">
             <TimeSelect

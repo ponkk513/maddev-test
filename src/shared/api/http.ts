@@ -2,16 +2,11 @@ import type { ZodType } from 'zod';
 import { ApiError, apiErrorBodySchema } from './errors';
 
 export type RequestOptions<T> = RequestInit & {
-  /** Runtime validation of the response: the client never trusts the shape blindly. */
   schema?: ZodType<T>;
 };
 
 export type HttpClient = <T>(path: string, options?: RequestOptions<T>) => Promise<T>;
 
-/**
- * A thin wrapper over fetch: builds the URL, sends JSON
- * and converts any non-2xx or malformed response into an ApiError.
- */
 export function createHttpClient(baseUrl: string): HttpClient {
   const base = baseUrl.endsWith('/') ? baseUrl : `${baseUrl}/`;
 

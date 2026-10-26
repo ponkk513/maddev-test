@@ -7,7 +7,6 @@ type Props = {
   bookings: Booking[];
   now: Date;
   highlightedId?: string;
-  /** Slot for actions on an editable booking (provided by features). */
   renderActions: (booking: Booking) => ReactNode;
 };
 

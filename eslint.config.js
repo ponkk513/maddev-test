@@ -5,10 +5,7 @@ import reactHooks from 'eslint-plugin-react-hooks';
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-/**
- * Feature-Sliced Design: a layer may import only from layers below it,
- * and other slices only through their public API (index.ts).
- */
+// Feature-Sliced Design: a layer imports only lower layers, other slices only via index.ts.
 const LAYERS = ['shared', 'entities', 'features', 'widgets', 'pages', 'app'];
 const SLICED = ['entities', 'features', 'widgets', 'pages'];
 
@@ -54,7 +51,6 @@ export default tseslint.config(
   },
   ...layerRules,
   {
-    // Tests and mock infrastructure sit outside the layers and may assemble the app freely.
     files: ['src/**/*.test.{ts,tsx}', 'src/test/**', 'src/mocks/**'],
     rules: { 'no-restricted-imports': 'off' },
   },

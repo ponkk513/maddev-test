@@ -1,8 +1,3 @@
-/**
- * Business rules of booking. Pure functions without side effects:
- * the same code is used by the UI (instant feedback) and by the mock server
- * (source of truth). "now" is always injected to keep functions testable.
- */
 import {
   MAX_DURATION_MIN,
   MIN_DURATION_MIN,
@@ -41,15 +36,11 @@ export type ValidationIssue = {
   message: string;
 };
 
-/** Intervals are half-open [start, end): touching borders is not an overlap. */
+// Half-open intervals [start, end): 10:00–11:00 and 11:00–12:00 do not overlap.
 export function overlaps(a: TimeRange, b: TimeRange): boolean {
   return toMinutes(a.start) < toMinutes(b.end) && toMinutes(b.start) < toMinutes(a.end);
 }
 
-/**
- * Bookings of the same date that overlap the draft.
- * `excludeId` — the booking being edited, so that it does not conflict with itself.
- */
 export function findConflicts(
   draft: Pick<BookingDraft, 'date' | 'start' | 'end'>,
   bookings: readonly Booking[],
@@ -66,26 +57,11 @@ export function isToday(date: string, now: Date): boolean {
   return date === toISODate(now);
 }
 
-/** A moment (date + HH:mm) has already come. */
-export function isPastMoment(date: string, time: string, now: Date): boolean {
-  if (isPastDate(date, now)) return true;
-  return isToday(date, now) && toMinutes(time) < minutesOfDay(now);
-}
-
-/**
- * A booking that has already started (or ended) can be neither edited nor deleted:
- * changing the past makes no sense.
- */
 export function isBookingLocked(booking: Booking, now: Date): boolean {
   if (isPastDate(booking.date, now)) return true;
   return isToday(booking.date, now) && toMinutes(booking.start) <= minutesOfDay(now);
 }
 
-/**
- * Validates everything except overlaps with other bookings
- * (those are checked separately via `findConflicts`, because
- * on the server they lead to a different status code — 409).
- */
 export function validateDraft(draft: BookingDraft, now: Date): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
 
@@ -105,7 +81,6 @@ export function validateDraft(draft: BookingDraft, now: Date): ValidationIssue[]
       message: `Название — не длиннее ${TITLE_MAX_LENGTH} символов`,
     });
   }
-  // A past date makes the booking impossible regardless of the time — report it even if times are invalid.
   if (isValidDate(draft.date) && isPastDate(draft.date, now)) {
     issues.push({
       field: 'date',

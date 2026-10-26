@@ -4,7 +4,6 @@ import type { ValidationIssue } from '../model/rules';
 import { bookingSchema } from '../model/schema';
 import type { Booking } from '../model/types';
 
-/** Error bodies of the bookings API (the server side of the contract implements exactly these). */
 export type BookingErrorBody =
   | { code: 'CONFLICT'; message: string; conflicts: Booking[] }
   | { code: 'VALIDATION'; message: string; issues: ValidationIssue[] }
@@ -24,14 +23,12 @@ export function hasErrorCode(error: unknown, code: BookingErrorCode): error is A
   return isApiError(error) && error.code === code;
 }
 
-/** Bookings the server reported as conflicting (409). */
 export function getConflicts(error: unknown): Booking[] {
   if (!hasErrorCode(error, 'CONFLICT')) return [];
   const parsed = conflictBodySchema.safeParse(error.body);
   return parsed.success ? parsed.data.conflicts : [];
 }
 
-/** Business rule violations reported by the server (422). */
 export function getValidationIssues(error: unknown): ValidationIssue[] {
   if (!hasErrorCode(error, 'VALIDATION')) return [];
   const parsed = validationBodySchema.safeParse(error.body);

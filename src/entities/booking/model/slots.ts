@@ -14,7 +14,6 @@ const DAY_START = toMinutes(WORKDAY_START);
 const DAY_END = toMinutes(WORKDAY_END);
 const DEFAULT_DURATION_MIN = 60;
 
-/** The earliest minute you can still book on `date`, or null if the day is over. */
 export function earliestBookableMinute(date: string, now: Date): number | null {
   if (isPastDate(date, now)) return null;
   if (!isToday(date, now)) return DAY_START;
@@ -26,7 +25,6 @@ export function earliestBookableMinute(date: string, now: Date): number | null {
 
 export type TimeOption = { value: string; disabled: boolean };
 
-/** Options for start/end selects: every TIME_STEP_MIN within the working day. */
 export function buildTimeOptions(kind: 'start' | 'end', date: string, now: Date): TimeOption[] {
   const from = kind === 'start' ? DAY_START : DAY_START + MIN_DURATION_MIN;
   const to = kind === 'start' ? DAY_END - MIN_DURATION_MIN : DAY_END;
@@ -40,10 +38,6 @@ export function buildTimeOptions(kind: 'start' | 'end', date: string, now: Date)
   return options;
 }
 
-/**
- * Builds a range starting exactly at `startMin`: default length is one hour,
- * shortened up to the next booking / end of the day, but not shorter than the minimum.
- */
 export function rangeStartingAt(
   startMin: number,
   bookings: readonly Booking[],
@@ -59,7 +53,6 @@ export function rangeStartingAt(
   return { start: fromMinutes(startMin), end: fromMinutes(Math.min(end, DAY_END)) };
 }
 
-/** The first free range of at least MIN_DURATION_MIN, or null if the day is full. */
 export function suggestFreeRange(
   date: string,
   bookings: readonly Booking[],
@@ -80,7 +73,6 @@ export function suggestFreeRange(
 export type SlotStatus = 'free' | 'busy' | 'past';
 export type Slot = TimeRange & { status: SlotStatus };
 
-/** Slots of the timeline grid. A slot is busy if any booking touches it partially. */
 export function buildDaySlots(
   date: string,
   bookings: readonly Booking[],

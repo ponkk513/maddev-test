@@ -3,11 +3,9 @@ import { formatBooking, hasErrorCode, useDeleteBooking, type Booking } from '@/e
 import { getErrorMessage } from '@/shared/api';
 
 type Options = {
-  /** Called once the booking is gone (deleted now or already deleted by someone else). */
   onDeleted: (booking: Booking, message: string) => void;
 };
 
-/** Delete-with-confirmation flow: which booking is being confirmed, request state, errors. */
 export function useDeleteBookingFlow({ onDeleted }: Options) {
   const [target, setTarget] = useState<Booking | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +23,6 @@ export function useDeleteBookingFlow({ onDeleted }: Options) {
       await mutation.mutateAsync(target);
       finish(target, `Бронь ${formatBooking({ ...target, title: undefined })} удалена`);
     } catch (e) {
-      // The goal is achieved anyway — the list has already been refetched.
       if (hasErrorCode(e, 'NOT_FOUND')) finish(target, 'Эта бронь уже была удалена');
       else setError(getErrorMessage(e));
     }

@@ -11,7 +11,6 @@ type Props = {
   onDeleted: (booking: Booking) => void;
 };
 
-/** List of the day's bookings with edit/delete actions. */
 export function DayBookings({ date, now, editingId, onEdit, onDeleted }: Props) {
   const query = useBookings(date);
   const notify = useNotify();
@@ -21,7 +20,6 @@ export function DayBookings({ date, now, editingId, onEdit, onDeleted }: Props) 
     onDeleted: (booking, message) => {
       notify(message);
       onDeleted(booking);
-      // The button that opened the dialog is gone with the booking — keep keyboard focus nearby.
       requestAnimationFrame(() => titleRef.current?.focus());
     },
   });

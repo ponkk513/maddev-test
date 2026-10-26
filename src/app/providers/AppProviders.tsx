@@ -5,7 +5,6 @@ import { createQueryClient } from './queryClient';
 
 type Props = {
   children: ReactNode;
-  /** Injected in tests to get an isolated cache. */
   queryClient?: QueryClient;
 };
 

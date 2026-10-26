@@ -67,7 +67,6 @@ describe('BookingPage', () => {
 
     const form = screen.getByRole('region', { name: 'Новая бронь' });
     expect(await within(form).findByRole('alert')).toHaveTextContent('Сервер временно недоступен');
-    // The background refetch fails too, but the previously loaded schedule stays on screen.
     expect(within(list()).getByText('Дейли')).toBeInTheDocument();
     expect(screen.getByLabelText('Начало')).toHaveValue('14:00');
     expect(screen.getByLabelText(/Название/)).toHaveValue('Синк');
@@ -111,7 +110,6 @@ describe('BookingPage', () => {
     await user.selectOptions(screen.getByLabelText('Окончание'), '15:00');
     await user.type(screen.getByLabelText(/Название/), 'Важная встреча');
 
-    // Someone else books the time after our list was loaded.
     store.insert({ id: 'other', date: TODAY, start: '14:30', end: '15:30', title: 'Чужая бронь' });
 
     await user.click(screen.getByRole('button', { name: 'Забронировать' }));
@@ -120,10 +118,8 @@ describe('BookingPage', () => {
     expect(alert).toHaveTextContent('это время заняли: 14:30–15:30 «Чужая бронь»');
     expect(alert).toHaveFocus();
 
-    // The list is refetched and now contains the conflicting booking.
     expect(await within(list()).findByText('Чужая бронь')).toBeInTheDocument();
 
-    // The user's input is intact.
     expect(screen.getByLabelText('Начало')).toHaveValue('14:00');
     expect(screen.getByLabelText('Окончание')).toHaveValue('15:00');
     expect(screen.getByLabelText(/Название/)).toHaveValue('Важная встреча');
@@ -132,7 +128,6 @@ describe('BookingPage', () => {
   it('keeps the suggested time after a 409 even if the user did not touch the form', async () => {
     const user = renderApp();
     await within(list()).findByText('Дейли');
-    // The form is prefilled with the first free range.
     expect(screen.getByLabelText('Начало')).toHaveValue('09:00');
     expect(screen.getByLabelText('Окончание')).toHaveValue('10:00');
 
@@ -140,7 +135,6 @@ describe('BookingPage', () => {
     await user.click(screen.getByRole('button', { name: 'Забронировать' }));
 
     expect(await within(list()).findByText('Чужая бронь')).toBeInTheDocument();
-    // The form must not silently jump to another suggested slot.
     expect(screen.getByLabelText('Начало')).toHaveValue('09:00');
     expect(screen.getByLabelText('Окончание')).toHaveValue('10:00');
     expect(screen.getByRole('alert')).toHaveTextContent('это время заняли');
@@ -180,15 +174,12 @@ describe('BookingPage', () => {
     renderApp();
     await within(list()).findByText('Дейли');
 
-    // Timeline: slots that have passed are not offered.
     expect(screen.queryByRole('button', { name: 'Выбрать время с 11:30' })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Выбрать время с 12:30' })).toBeInTheDocument();
-    // Selects: past start times are disabled, the suggestion starts in the future.
     const startSelect = screen.getByLabelText('Начало');
     expect(within(startSelect).getByRole('option', { name: '12:00' })).toBeDisabled();
     expect(within(startSelect).getByRole('option', { name: '12:15' })).toBeEnabled();
     expect(screen.getByLabelText('Начало')).toHaveValue('12:15');
-    // A booking that already ended cannot be changed.
     expect(within(list()).getByText('Прошла')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Изменить бронь/ })).not.toBeInTheDocument();
   });
@@ -201,7 +192,6 @@ describe('BookingPage', () => {
     expect(screen.getByLabelText('Начало')).toHaveValue('14:00');
     expect(screen.getByLabelText('Окончание')).toHaveValue('15:00');
 
-    // Shortened up to the next booking.
     await user.click(screen.getByRole('button', { name: 'Выбрать время с 09:30' }));
     expect(screen.getByLabelText('Начало')).toHaveValue('09:30');
     expect(screen.getByLabelText('Окончание')).toHaveValue('10:00');

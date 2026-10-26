@@ -28,21 +28,14 @@ type Options = {
   date: string;
   now: Date;
   bookings: Booking[];
-  /** The day's bookings are loaded; until then suggestions and conflict checks are meaningless. */
   ready: boolean;
   onSaved: (booking: Booking, mode: BookingFormMode['kind']) => void;
 };
 
-/**
- * Model of the create/edit booking form on top of React Hook Form.
- *
- * While the form is *pristine*, its values follow external data: the first free
- * range of the day or the booking being edited (RHF `values` prop). The first input
- * or a submit makes the values the user's — background refetches (e.g. after a 409)
- * never overwrite them.
- */
 export function useBookingForm({ date, now, bookings, ready, onSaved }: Options) {
   const [mode, setMode] = useState<BookingFormMode>({ kind: 'create' });
+  // While pristine, values follow external data (a free slot or the edited booking).
+  // After any input or submit they belong to the user and survive refetches, e.g. after a 409.
   const [pristine, setPristine] = useState(true);
   const editing = mode.kind === 'edit' ? mode.booking : undefined;
 
@@ -67,10 +60,8 @@ export function useBookingForm({ date, now, bookings, ready, onSaved }: Options)
     mode: 'onChange',
   });
 
-  // The validation context (date, bookings) changed under the user's input — e.g. the list
-  // was refetched after a 409: re-check so the new conflict shows up next to the fields.
-  // Field names are listed explicitly: a bare trigger() replaces *all* errors, wiping the
-  // server error (root.server) that has to stay visible after a 409.
+  // Revalidate when bookings change under the input. Names are explicit: a bare trigger()
+  // replaces all errors and would wipe the server error (root.server).
   useEffect(() => {
     if (!pristine) void form.trigger(FIELD_NAMES);
   }, [date, bookings, pristine, form]);
@@ -102,13 +93,11 @@ export function useBookingForm({ date, now, bookings, ready, onSaved }: Options)
     } catch (error) {
       const serverError = toServerError(error, Boolean(editing));
       form.setError('root.server', { type: serverError.kind, message: serverError.message });
-      // Deleted by someone else: keep the input, offer to create a new booking instead.
       if (serverError.kind === 'gone') setMode({ kind: 'create' });
     }
   });
 
   function submit(event?: FormEvent) {
-    // Freeze the values: what was submitted must stay on screen whatever the server answers.
     setPristine(false);
     return onValid(event);
   }
@@ -153,7 +142,6 @@ export function useBookingForm({ date, now, bookings, ready, onSaved }: Options)
     pickSlot,
     startEdit: (booking: Booking) => resetTo({ kind: 'edit', booking }),
     cancel: () => resetTo({ kind: 'create' }),
-    /** The edited booking belongs to its date: leave edit mode when the date changes. */
     onDateChange: () => {
       if (mode.kind === 'edit') resetTo({ kind: 'create' });
     },

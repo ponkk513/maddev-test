@@ -6,10 +6,6 @@ type Notify = (message: string) => void;
 
 const NotifyContext = createContext<Notify | null>(null);
 
-/**
- * Results of user actions ("Booking created"). A single polite live region
- * that is always mounted, so screen readers announce every message.
- */
 export function NotificationsProvider({ children }: { children: ReactNode }) {
   const [message, setMessage] = useState('');
   const notify = useCallback<Notify>((next) => setMessage(next), []);

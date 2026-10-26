@@ -8,7 +8,6 @@ async function bootstrap() {
   let devTools: ReactNode = null;
 
   if (USE_MOCKS) {
-    // Dynamic imports keep MSW out of the bundle when mocks are off.
     const [{ worker }, { DevPanel }] = await Promise.all([
       import('@/mocks/browser'),
       import('@/mocks/DevPanel'),

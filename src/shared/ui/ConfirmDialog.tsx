@@ -12,7 +12,6 @@ type Props = {
   onClose: () => void;
 };
 
-/** Confirmation built on the native <dialog>: focus trap and Esc for free. */
 export function ConfirmDialog({
   open,
   title,
@@ -59,8 +58,7 @@ export function ConfirmDialog({
             </div>
           )}
           <div className="dialog__actions">
-            {/* eslint-disable-next-line jsx-a11y/no-autofocus -- the safe action gets focus in a destructive dialog */}
-            <button type="button" className="btn" onClick={onClose} disabled={isPending} autoFocus>
+            <button type="button" className="btn" onClick={onClose} disabled={isPending}>
               Отмена
             </button>
             <button

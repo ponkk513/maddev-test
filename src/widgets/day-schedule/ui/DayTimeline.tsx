@@ -17,7 +17,6 @@ type Props = {
   now: Date;
   editingId?: string;
   preview: (TimeRange & { invalid: boolean }) | null;
-  /** Whether creating is possible at all (e.g. not a past date). */
   interactive: boolean;
   onPickSlot: (start: string) => void;
   onEdit: (booking: Booking) => void;
@@ -26,7 +25,6 @@ type Props = {
 const DAY_START = toMinutes(WORKDAY_START);
 const DAY_END = toMinutes(WORKDAY_END);
 
-/** Position on the grid in slot units — CSS turns it into pixels via --slot-h. */
 function place(range: TimeRange): CSSProperties {
   const top = (toMinutes(range.start) - DAY_START) / SLOT_SIZE_MIN;
   const height = (toMinutes(range.end) - toMinutes(range.start)) / SLOT_SIZE_MIN;
@@ -80,38 +78,41 @@ export function DayTimeline({
         })}
       </ol>
 
-      {/*
-        Booking blocks duplicate the accessible list below,
-        so they are hidden from assistive tech; for mouse/touch they are a shortcut to editing.
-      */}
       <div className="timeline__overlay" aria-hidden="true">
         {bookings.map((b) => {
           const locked = isBookingLocked(b, now);
           const editing = b.id === editingId;
-          // Clicking the booking being edited would restart editing and drop unsaved changes.
-          const clickable = !locked && !editing;
-          return (
-            // Mouse/touch shortcut only: keyboard and screen-reader users get the same
-            // action via the "Изменить" buttons in the bookings list.
-            // eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
-            <div
-              key={b.id}
-              className={[
-                'timeline__booking',
-                locked && 'timeline__booking--locked',
-                editing && 'timeline__booking--editing',
-              ]
-                .filter(Boolean)
-                .join(' ')}
-              style={place(b)}
-              onClick={clickable ? () => onEdit(b) : undefined}
-              title={clickable ? 'Нажмите, чтобы изменить' : undefined}
-            >
+          const className = [
+            'timeline__booking',
+            locked && 'timeline__booking--locked',
+            editing && 'timeline__booking--editing',
+          ]
+            .filter(Boolean)
+            .join(' ');
+          const content = (
+            <>
               <span className="timeline__booking-time">
                 {b.start}–{b.end}
               </span>
               <span className="timeline__booking-title">{b.title || 'Без названия'}</span>
+            </>
+          );
+          return locked || editing ? (
+            <div key={b.id} className={className} style={place(b)}>
+              {content}
             </div>
+          ) : (
+            <button
+              key={b.id}
+              type="button"
+              tabIndex={-1}
+              className={className}
+              style={place(b)}
+              onClick={() => onEdit(b)}
+              title="Нажмите, чтобы изменить"
+            >
+              {content}
+            </button>
           );
         })}
 

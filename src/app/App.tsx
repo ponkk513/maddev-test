@@ -4,7 +4,6 @@ import { BookingPage } from '@/pages/booking';
 import { AppProviders } from './providers/AppProviders';
 
 type Props = {
-  /** Extra UI outside the product (the mock API dev panel). */
   devTools?: ReactNode;
   queryClient?: QueryClient;
 };

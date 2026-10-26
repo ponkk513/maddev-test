@@ -14,7 +14,6 @@ type Props = {
   onEdit: (booking: Booking) => void;
 };
 
-/** The day's timeline with loading / error / background-refresh states. */
 export function DaySchedule({ date, now, editingId, preview, onPickSlot, onEdit }: Props) {
   const query = useBookings(date);
   const retry = () => void query.refetch();

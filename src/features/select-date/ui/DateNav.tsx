@@ -32,7 +32,6 @@ export function DateNav({ date, now, onChange }: Props) {
           value={date}
           required
           onChange={(e) => {
-            // Ignore an intermediate/empty value while the user types in the native picker.
             if (isValidDate(e.target.value)) onChange(e.target.value);
           }}
         />

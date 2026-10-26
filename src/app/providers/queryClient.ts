@@ -6,7 +6,6 @@ export function createQueryClient() {
     defaultOptions: {
       queries: {
         staleTime: 10_000,
-        // 4xx are deterministic — retrying makes no sense; network/5xx are retried once.
         retry: (failureCount, error) =>
           !(isApiError(error) && error.isClientError) && failureCount < 1,
       },

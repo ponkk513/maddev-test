@@ -8,7 +8,6 @@ import { DaySchedule } from '@/widgets/day-schedule';
 
 const NO_BOOKINGS: Booking[] = [];
 
-/** Composition only: the page wires widgets and features together, logic lives in the slices. */
 export function BookingPage() {
   const now = useNow();
   const notify = useNotify();
